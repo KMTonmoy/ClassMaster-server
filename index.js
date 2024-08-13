@@ -31,7 +31,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-
+ 
         console.log("Connected to MongoDB");
 
         const usersCollection = client.db('classmaster').collection('users');
