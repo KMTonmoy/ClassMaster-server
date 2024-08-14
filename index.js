@@ -117,6 +117,25 @@ async function run() {
         });
 
 
+        app.delete('/users/:email', async (req, res) => {
+            const email = req.params.email;
+
+            try {
+                const result = await usersCollection.deleteOne({ email });
+
+                if (result.deletedCount > 0) {
+                    res.send({ message: 'User deleted successfully' });
+                } else {
+                    res.status(404).send({ message: 'User not found' });
+                }
+            } catch (error) {
+                res.status(500).send({ message: 'Failed to delete user' });
+            }
+        });
+
+
+
+
         app.put('/user', async (req, res) => {
             const user = req.body;
             const query = { email: user?.email, name: user.displayName };
@@ -154,46 +173,6 @@ async function run() {
             }
         });
 
-        app.put('/users/:email', async (req, res) => {
-            const email = req.params.email;
-            const updatedUser = req.body;
-
-            try {
-                const filter = { email: email };
-                const updateDoc = {
-                    $set: updatedUser,
-                };
-                const result = await usersCollection.updateOne(filter, updateDoc);
-
-                if (result.modifiedCount > 0) {
-                    res.send({ message: 'User updated successfully' });
-                } else {
-                    res.status(404).send({ message: 'User not found or no changes made' });
-                }
-            } catch (error) {
-                console.error('Error updating user:', error.message);
-                res.status(500).send({ message: 'Failed to update user' });
-            }
-        });
-
-
-
-        app.delete('/users/:email', async (req, res) => {
-            const email = req.params.email;
-
-            try {
-                const result = await usersCollection.deleteOne({ email: email });
-
-                if (result.deletedCount > 0) {
-                    res.send({ message: 'User deleted successfully' });
-                } else {
-                    res.status(404).send({ message: 'User not found' });
-                }
-            } catch (error) {
-                console.error('Error deleting user:', error.message);
-                res.status(500).send({ message: 'Failed to delete user' });
-            }
-        });
 
 
 
