@@ -31,15 +31,16 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
- 
+
         console.log("Connected to MongoDB");
 
         const usersCollection = client.db('classmaster').collection('users');
         const bannerCollection = client.db('classmaster').collection('banner');
         const faqCollection = client.db('classmaster').collection('faq');
         const testimonialsCollection = client.db('classmaster').collection('testimonials');
+        const classroomCollection = client.db('classmaster').collection('classroom');
 
- 
+
 
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -53,6 +54,26 @@ async function run() {
             const banner = await bannerCollection.find().toArray();
             res.send(banner);
         });
+        app.get('/classroom', async (req, res) => {
+            const classroom = await classroomCollection.find().toArray();
+            res.send(classroom);
+        });
+
+
+
+        app.post('/classrooms', async (req, res) => {
+            const newClassroom = req.body;
+            try {
+                const result = await classroomCollection.insertOne(newClassroom);
+                res.status(201).send(result);
+            } catch (error) {
+                console.error('Error registering user:', error.message);
+                res.status(500).send({ message: 'Failed to register user. Please try again.' });
+            }
+        });
+
+
+
         app.get('/faq', async (req, res) => {
             const faq = await faqCollection.find().toArray();
             res.send(faq);
@@ -64,7 +85,7 @@ async function run() {
             const test = await testimonialsCollection.find().toArray();
             res.send(test);
         });
- 
+
 
         app.post('/testimonial', async (req, res) => {
             const newComment = req.body;
@@ -130,6 +151,47 @@ async function run() {
             } catch (error) {
                 console.error('Error registering user:', error.message);
                 res.status(500).send({ message: 'Failed to register user. Please try again.' });
+            }
+        });
+
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const updatedUser = req.body;
+
+            try {
+                const filter = { email: email };
+                const updateDoc = {
+                    $set: updatedUser,
+                };
+                const result = await usersCollection.updateOne(filter, updateDoc);
+
+                if (result.modifiedCount > 0) {
+                    res.send({ message: 'User updated successfully' });
+                } else {
+                    res.status(404).send({ message: 'User not found or no changes made' });
+                }
+            } catch (error) {
+                console.error('Error updating user:', error.message);
+                res.status(500).send({ message: 'Failed to update user' });
+            }
+        });
+
+
+
+        app.delete('/users/:email', async (req, res) => {
+            const email = req.params.email;
+
+            try {
+                const result = await usersCollection.deleteOne({ email: email });
+
+                if (result.deletedCount > 0) {
+                    res.send({ message: 'User deleted successfully' });
+                } else {
+                    res.status(404).send({ message: 'User not found' });
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error.message);
+                res.status(500).send({ message: 'Failed to delete user' });
             }
         });
 
